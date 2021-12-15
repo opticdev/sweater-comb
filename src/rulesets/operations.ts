@@ -47,31 +47,31 @@ export const rules = {
       },
     );
   },
-  operationIdSet: ({ operations }: SnykApiCheckDsl) => {
-    operations.requirement.must(
-      "have operationId",
-      (operation, context, docs) => {
-        docs.includeDocsLink(links.standards.operationIds);
-        expect(operation.operationId).to.be.ok;
-      },
-    );
-  },
-  tags: ({ operations }: SnykApiCheckDsl) => {
-    operations.requirement.must("have tags", (operation, context, docs) => {
-      docs.includeDocsLink(links.standards.tags);
-      expect(operation.tags).to.exist;
-      expect(operation.tags).to.have.lengthOf.above(0, "with at least one tag");
-    });
-  },
-  summary: ({ operations }: SnykApiCheckDsl) => {
-    operations.requirement.must(
-      "have a summary",
-      (operation, context, docs) => {
-        docs.includeDocsLink(links.standards.operationSummary);
-        expect(operation.summary).to.exist;
-      },
-    );
-  },
+  // operationIdSet: ({ operations }: SnykApiCheckDsl) => {
+  //   operations.requirement.must(
+  //     "have operationId",
+  //     (operation, context, docs) => {
+  //       docs.includeDocsLink(links.standards.operationIds);
+  //       expect(operation.operationId).to.be.ok;
+  //     },
+  //   );
+  // },
+  // tags: ({ operations }: SnykApiCheckDsl) => {
+  //   operations.requirement.must("have tags", (operation, context, docs) => {
+  //     docs.includeDocsLink(links.standards.tags);
+  //     expect(operation.tags).to.exist;
+  //     expect(operation.tags).to.have.lengthOf.above(0, "with at least one tag");
+  //   });
+  // },
+  // summary: ({ operations }: SnykApiCheckDsl) => {
+  //   operations.requirement.must(
+  //     "have a summary",
+  //     (operation, context, docs) => {
+  //       docs.includeDocsLink(links.standards.operationSummary);
+  //       expect(operation.summary).to.exist;
+  //     },
+  //   );
+  // },
   removingOperationId: ({ operations }: SnykApiCheckDsl) => {
     operations.changed.must(
       "have consistent operation IDs",
@@ -81,90 +81,90 @@ export const rules = {
       },
     );
   },
-  parameterCase: ({ operations }: SnykApiCheckDsl) => {
-    operations.requirementOnChange.must(
-      "use the correct case",
-      (operation, context, docs, specItem) => {
-        docs.includeDocsLink(links.standards.parameterNamesPathComponents);
-        for (const p of specItem.parameters || []) {
-          const parameter = p as OpenAPIV3.ParameterObject;
-          if (["path", "query"].includes(parameter.in)) {
-            const normalized = snakeCase(parameter.name);
-
-            expect(
-              normalized === parameter.name,
-              `expected parameter name "${parameter.name}" to be snake_case (${normalized})`,
-            ).to.be.ok;
-          }
-        }
-      },
-    );
-  },
+  // parameterCase: ({ operations }: SnykApiCheckDsl) => {
+  //   operations.requirementOnChange.must(
+  //     "use the correct case",
+  //     (operation, context, docs, specItem) => {
+  //       docs.includeDocsLink(links.standards.parameterNamesPathComponents);
+  //       for (const p of specItem.parameters || []) {
+  //         const parameter = p as OpenAPIV3.ParameterObject;
+  //         if (["path", "query"].includes(parameter.in)) {
+  //           const normalized = snakeCase(parameter.name);
+  //
+  //           expect(
+  //             normalized === parameter.name,
+  //             `expected parameter name "${parameter.name}" to be snake_case (${normalized})`,
+  //           ).to.be.ok;
+  //         }
+  //       }
+  //     },
+  //   );
+  // },
   preventRemovingOperation: ({ operations }: SnykApiCheckDsl) => {
     operations.removed.must("not be allowed", (operation, context, docs) => {
       docs.includeDocsLink(links.versioning.breakingChanges);
       expect.fail("expected operation to be present");
     });
   },
-  versionParameter: ({ operations }: SnykApiCheckDsl) => {
-    operations.requirement.must(
-      "include a version parameter",
-      (operation, context, docs, specItem) => {
-        docs.includeDocsLink(links.versioning.versionParameter);
-        const parameters = (specItem.parameters ||
-          []) as OpenAPIV3.ParameterObject[];
-        const parameterNames = parameters
-          .filter((parameter) => parameter.in === "query")
-          .map((parameter) => {
-            return parameter.name;
-          });
-        expect(parameterNames).to.include("version");
-      },
-    );
-  },
-  tenantFormatting: ({ operations }: SnykApiCheckDsl) => {
-    operations.requirement.must(
-      "use UUID for org_id or group_id",
-      (operation, context, docs, specItem) => {
-        docs.includeDocsLink(links.standards.orgAndGroupTenantResources);
-        for (const parameter of specItem.parameters || []) {
-          if ("$ref" in parameter) continue;
-          if (parameter.name === "group_id" || parameter.name === "org_id") {
-            if (!parameter.schema) {
-              expect.fail(
-                `expected operation ${operation.pathPattern} ${operation.method} parameter ${parameter.name} to have a schema`,
-              );
-              continue;
-            }
-            if (!("$ref" in parameter.schema)) {
-              expect(
-                parameter.schema.format,
-                `expected operation ${operation.pathPattern} ${operation.method} parameter ${parameter.name} to use format UUID`,
-              ).to.equal("uuid");
-            }
-          }
-        }
-      },
-    );
-  },
-  pathElementsCasing: ({ specification }: SnykApiCheckDsl) => {
-    specification.requirement.must(
-      "use the right casing for path elements",
-      (spec, context, docs) => {
-        docs.includeDocsLink(links.standards.parameterNamesPathComponents);
-        const pathUrls = Object.keys(spec.paths);
-        for (const pathUrl of pathUrls) {
-          const parts = pathUrl.replace(/[?].*/, "").split(/[/]/);
-          const invalid = parts
-            // Filter out empty string (leading path) and params (different rule)
-            .filter((part) => part.length > 0 && !part.match(/^[{].*[}]/))
-            .filter((part) => snakeCase(part) !== part);
-          expect(invalid, `expected ${pathUrl} to support correct casing`).to.be
-            .empty;
-        }
-      },
-    );
-  },
+  // versionParameter: ({ operations }: SnykApiCheckDsl) => {
+  //   operations.requirement.must(
+  //     "include a version parameter",
+  //     (operation, context, docs, specItem) => {
+  //       docs.includeDocsLink(links.versioning.versionParameter);
+  //       const parameters = (specItem.parameters ||
+  //         []) as OpenAPIV3.ParameterObject[];
+  //       const parameterNames = parameters
+  //         .filter((parameter) => parameter.in === "query")
+  //         .map((parameter) => {
+  //           return parameter.name;
+  //         });
+  //       expect(parameterNames).to.include("version");
+  //     },
+  //   );
+  // },
+  // tenantFormatting: ({ operations }: SnykApiCheckDsl) => {
+  //   operations.requirement.must(
+  //     "use UUID for org_id or group_id",
+  //     (operation, context, docs, specItem) => {
+  //       docs.includeDocsLink(links.standards.orgAndGroupTenantResources);
+  //       for (const parameter of specItem.parameters || []) {
+  //         if ("$ref" in parameter) continue;
+  //         if (parameter.name === "group_id" || parameter.name === "org_id") {
+  //           if (!parameter.schema) {
+  //             expect.fail(
+  //               `expected operation ${operation.pathPattern} ${operation.method} parameter ${parameter.name} to have a schema`,
+  //             );
+  //             continue;
+  //           }
+  //           if (!("$ref" in parameter.schema)) {
+  //             expect(
+  //               parameter.schema.format,
+  //               `expected operation ${operation.pathPattern} ${operation.method} parameter ${parameter.name} to use format UUID`,
+  //             ).to.equal("uuid");
+  //           }
+  //         }
+  //       }
+  //     },
+  //   );
+  // },
+  // pathElementsCasing: ({ specification }: SnykApiCheckDsl) => {
+  //   specification.requirement.must(
+  //     "use the right casing for path elements",
+  //     (spec, context, docs) => {
+  //       docs.includeDocsLink(links.standards.parameterNamesPathComponents);
+  //       const pathUrls = Object.keys(spec.paths);
+  //       for (const pathUrl of pathUrls) {
+  //         const parts = pathUrl.replace(/[?].*/, "").split(/[/]/);
+  //         const invalid = parts
+  //           // Filter out empty string (leading path) and params (different rule)
+  //           .filter((part) => part.length > 0 && !part.match(/^[{].*[}]/))
+  //           .filter((part) => snakeCase(part) !== part);
+  //         expect(invalid, `expected ${pathUrl} to support correct casing`).to.be
+  //           .empty;
+  //       }
+  //     },
+  //   );
+  // },
   preventAddingRequiredQueryParameters: ({ request }: SnykApiCheckDsl) => {
     request.queryParameter.added.must(
       "not be required",
@@ -188,68 +188,68 @@ export const rules = {
       },
     );
   },
-  preventRemovingStatusCodes: ({ responses }: SnykApiCheckDsl) => {
-    responses.removed.must("not be removed", (response, context, docs) => {
-      docs.includeDocsLink(links.versioning.breakingChanges);
-      if (!("inResponse" in context)) return;
-      expect.fail(
-        `expected ${context.method} ${context.path} ${context.inResponse?.statusCode} to be present`,
-      );
-    });
-  },
-  preventChangingParameterDefaultValue: ({ request }: SnykApiCheckDsl) => {
-    request.queryParameter.changed.must(
-      "not change the default value",
-      (parameterBefore, parameterAfter, context, docs) => {
-        docs.includeDocsLink(links.versioning.breakingChanges);
-        let beforeSchema = (parameterBefore.schema ||
-          {}) as OpenAPIV3.SchemaObject;
-        let afterSchema = (parameterAfter.schema ||
-          {}) as OpenAPIV3.SchemaObject;
-        expect(beforeSchema.default).to.equal(afterSchema.default);
-      },
-    );
-  },
-  preventChangingParameterSchemaFormat: ({ request }: SnykApiCheckDsl) => {
-    request.pathParameter.changed.must(
-      "not change the path parameter format",
-      preventParameterChange("format"),
-    );
-    request.queryParameter.changed.must(
-      "not change the query parameter format",
-      preventParameterChange("format"),
-    );
-    request.header.changed.must(
-      "not change the header format",
-      preventParameterChange("format"),
-    );
-  },
-  preventChangingParameterSchemaPattern: ({ request }: SnykApiCheckDsl) => {
-    request.pathParameter.changed.must(
-      "not change the path parameter pattern",
-      preventParameterChange("pattern"),
-    );
-    request.queryParameter.changed.must(
-      "not change the query parameter pattern",
-      preventParameterChange("pattern"),
-    );
-    request.header.changed.must(
-      "not change the header pattern",
-      preventParameterChange("pattern"),
-    );
-  },
-  preventChangingParameterSchemaType: ({ request }: SnykApiCheckDsl) => {
-    request.pathParameter.changed.must(
-      "not change the path parameter pattern",
-      preventParameterChange("type"),
-    );
-    request.queryParameter.changed.must(
-      "not change the query parameter pattern",
-      preventParameterChange("type"),
-    );
-    request.header.changed.must(
-      "not change the header pattern",
-      preventParameterChange("type"),
-    );
-  },
+  // preventRemovingStatusCodes: ({ responses }: SnykApiCheckDsl) => {
+  //   responses.removed.must("not be removed", (response, context, docs) => {
+  //     docs.includeDocsLink(links.versioning.breakingChanges);
+  //     if (!("inResponse" in context)) return;
+  //     expect.fail(
+  //       `expected ${context.method} ${context.path} ${context.inResponse?.statusCode} to be present`,
+  //     );
+  //   });
+  // },
+  // preventChangingParameterDefaultValue: ({ request }: SnykApiCheckDsl) => {
+  //   request.queryParameter.changed.must(
+  //     "not change the default value",
+  //     (parameterBefore, parameterAfter, context, docs) => {
+  //       docs.includeDocsLink(links.versioning.breakingChanges);
+  //       let beforeSchema = (parameterBefore.schema ||
+  //         {}) as OpenAPIV3.SchemaObject;
+  //       let afterSchema = (parameterAfter.schema ||
+  //         {}) as OpenAPIV3.SchemaObject;
+  //       expect(beforeSchema.default).to.equal(afterSchema.default);
+  //     },
+  //   );
+  // },
+  // preventChangingParameterSchemaFormat: ({ request }: SnykApiCheckDsl) => {
+  //   request.pathParameter.changed.must(
+  //     "not change the path parameter format",
+  //     preventParameterChange("format"),
+  //   );
+  //   request.queryParameter.changed.must(
+  //     "not change the query parameter format",
+  //     preventParameterChange("format"),
+  //   );
+  //   request.header.changed.must(
+  //     "not change the header format",
+  //     preventParameterChange("format"),
+  //   );
+  // },
+  // preventChangingParameterSchemaPattern: ({ request }: SnykApiCheckDsl) => {
+  //   request.pathParameter.changed.must(
+  //     "not change the path parameter pattern",
+  //     preventParameterChange("pattern"),
+  //   );
+  //   request.queryParameter.changed.must(
+  //     "not change the query parameter pattern",
+  //     preventParameterChange("pattern"),
+  //   );
+  //   request.header.changed.must(
+  //     "not change the header pattern",
+  //     preventParameterChange("pattern"),
+  //   );
+  // },
+  // preventChangingParameterSchemaType: ({ request }: SnykApiCheckDsl) => {
+  //   request.pathParameter.changed.must(
+  //     "not change the path parameter pattern",
+  //     preventParameterChange("type"),
+  //   );
+  //   request.queryParameter.changed.must(
+  //     "not change the query parameter pattern",
+  //     preventParameterChange("type"),
+  //   );
+  //   request.header.changed.must(
+  //     "not change the header pattern",
+  //     preventParameterChange("type"),
+  //   );
+  // },
 };
