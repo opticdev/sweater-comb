@@ -78,7 +78,21 @@ export const rules = {
       (response, context, docs, specItem) => {
         docs.includeDocsLink(links.standards.statusCodes);
         if (isOpenApiPath(context.path)) return;
-        if (context.method === "post") {
+
+        // is batch
+        if (context.method === "post" && context.requestDataPropertyIsArray) {
+          if (
+            response.statusCode.startsWith("2") &&
+            response.statusCode !== "204"
+          ) {
+            expect.fail(
+              `expected POST response for batches to only support 204, not ${response.statusCode}`,
+            );
+          }
+        }
+
+        // not batch
+        if (context.method === "post" && !context.requestDataPropertyIsArray) {
           if (
             response.statusCode.startsWith("2") &&
             response.statusCode !== "201"

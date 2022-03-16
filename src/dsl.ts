@@ -337,14 +337,39 @@ export class SnykApiCheckDsl implements ApiCheckDsl {
       ...genericEntityRuleImpl<
         OpenApiResponseFact,
         ConceptualLocation,
-        SynkApiCheckContext & { isSingletonPath: boolean },
+        SynkApiCheckContext & {
+          isSingletonPath: boolean;
+          requestDataPropertyIsArray: boolean;
+        },
         OpenAPIV3.ResponsesObject
       >(
         OpenApiKind.Response,
         dsl.changelog,
         dsl.nextFacts,
         (response) => `${response.statusCode}`,
-        (location) => dsl.getContext(location),
+        (location) => {
+          const dataPath = [
+            ...jsonPointerHelpers.decode(location.jsonPath).slice(0, 3),
+            "requestBody",
+            "content",
+            "application/vnd.api+json",
+            "schema",
+            "properties",
+            "data",
+          ];
+
+          const dataProperty = jsonPointerHelpers.tryGet(
+            dsl.nextJsonLike,
+            jsonPointerHelpers.compile(dataPath),
+          );
+
+          const requestDataPropertyIsArray =
+            dataProperty.match && (dataProperty.value as any).type === "array";
+
+          console.log(requestDataPropertyIsArray);
+
+          return { ...dsl.getContext(location), requestDataPropertyIsArray };
+        },
         (...items) => dsl.checks.push(...items),
         (pointer: string) => jsonPointerHelpers.get(dsl.nextJsonLike, pointer),
       ),
