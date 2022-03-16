@@ -85,10 +85,19 @@ export class SnykApiCheckDsl implements ApiCheckDsl {
     return this.checks;
   }
 
-  getContext(location: ILocation): ConceptualLocation & SynkApiCheckContext {
+  getContext(
+    location: ILocation,
+  ): ConceptualLocation & SynkApiCheckContext & { isSingletonPath: boolean } {
+    const pathSpecItem = jsonPointerHelpers.tryGet(
+      this.nextJsonLike,
+      jsonPointerHelpers.compile(["paths", location.conceptualLocation.path]),
+    );
+
     return {
       ...location.conceptualLocation,
       ...this.providedContext,
+      isSingletonPath:
+        pathSpecItem.match && pathSpecItem.value["x-snyk-resource-singleton"],
     };
   }
 
@@ -134,7 +143,7 @@ export class SnykApiCheckDsl implements ApiCheckDsl {
       ...genericEntityRuleImpl<
         OpenApiOperationFact,
         ConceptualLocation,
-        SynkApiCheckContext,
+        SynkApiCheckContext & { isSingletonPath: boolean },
         OpenAPIV3.OperationObject
       >(
         OpenApiKind.Operation,
@@ -307,7 +316,7 @@ export class SnykApiCheckDsl implements ApiCheckDsl {
       header: genericEntityRuleImpl<
         OpenApiRequestParameterFact,
         ConceptualLocation,
-        SynkApiCheckContext,
+        SynkApiCheckContext & { isSingletonPath: boolean },
         OpenAPIV3.ParameterObject
       >(
         OpenApiKind.HeaderParameter,
@@ -328,7 +337,7 @@ export class SnykApiCheckDsl implements ApiCheckDsl {
       ...genericEntityRuleImpl<
         OpenApiResponseFact,
         ConceptualLocation,
-        SynkApiCheckContext,
+        SynkApiCheckContext & { isSingletonPath: boolean },
         OpenAPIV3.ResponsesObject
       >(
         OpenApiKind.Response,

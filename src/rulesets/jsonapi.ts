@@ -181,6 +181,7 @@ export const rules = {
       (response, context, docs, specItem) => {
         docs.includeDocsLink(links.jsonApi.resourceObjects);
         if (isOpenApiPath(context.path)) return;
+        if (context.isSingletonPath) return;
         const responseName = getResponseName(response, context);
         if (
           !["patch", "delete"].includes(context.method) &&
@@ -340,6 +341,7 @@ export const rules = {
       (response, context, docs, specItem) => {
         docs.includeDocsLink(links.jsonApi.resourceObjects);
         if (isOpenApiPath(context.path)) return;
+        if (context.isSingletonPath) return;
         if (
           !(
             ["get", "post"].includes(context.method) &&
@@ -370,6 +372,7 @@ export const rules = {
       (response, context, docs, specItem) => {
         docs.includeDocsLink(links.jsonApi.resourceObjects);
         if (isOpenApiPath(context.path)) return;
+        if (context.isSingletonPath) return;
         if (!(context.method === "patch" && response.statusCode === "200"))
           return;
         const responseSchema =
@@ -412,28 +415,17 @@ export const rules = {
       },
     );
   },
-  // TODO: this is a schema checking a schema. It's currently failing, so removing for now.
-  // relationshipSchema: ({ responses }: SnykApiCheckDsl) => {
-  //   responses.requirementOnChange.must(
-  //     "have valid JSON:API schemas for relationships",
-  //     (response, context, docs, specItem) => {
-  //       docs.includeDocsLink(links.jsonApi.resourceObjects);
-  //       if (isOpenApiPath(context.path)) return;
-  //       const relationships =
-  //         specItem.content?.["application/vnd.api+json"]?.schema?.properties
-  //           ?.data?.properties?.relationships;
-  //       if (relationships) {
-  //         const schema: any = loadSchemaFromFile("relationship.yaml");
-  //         const validate = ajv.compile(schema);
-  //         expect(
-  //           validate(relationships),
-  //           `expected ${getResponseName(
-  //             response,
-  //             context,
-  //           )} schema to have valid relationships`,
-  //         ).to.be.true;
-  //       }
-  //     },
-  //   );
-  // },
+  doNotAllowDeleteOrPostIdForSingleton: ({ operations }: SnykApiCheckDsl) => {
+    operations.requirement.must(
+      "delete and post are not allowed for singletons",
+      (operation, context) => {
+        if (context.isSingletonPath) {
+          if (operation.method === "post" || operation.method === "delete")
+            expect.fail(
+              `${operation.method} is not allowed in JSON:API singletons`,
+            );
+        }
+      },
+    );
+  },
 };
