@@ -356,6 +356,7 @@ export const rules = {
         docs.includeDocsLink(links.jsonApi.resourceObjects);
         if (isOpenApiPath(context.path)) return;
         if (context.isSingletonPath) return;
+
         if (
           !(
             ["get", "post"].includes(context.method) &&
