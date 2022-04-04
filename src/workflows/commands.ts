@@ -6,6 +6,8 @@ import {
   addListOperationAction,
   addUpdateOperationAction,
   createResourceAction,
+  promoteVersionAction,
+  updateResourceAction,
 } from "./actions";
 
 export function createResourceCommand() {
@@ -55,16 +57,44 @@ export const addUpdateOperationCommand = buildOperationCommand(
 
 function buildOperationCommand(name: string, description: string, action) {
   const command = new Command(name)
-    .addArgument(new Argument("<openapi>", "path to openapi file"))
-    .addArgument(new Argument("<resource-name>", "[resource-name]"))
     .addArgument(
       new Argument("<plural-resource-name>", "[plural-resource-name]"),
     )
-    .action(async (specFilePath, resourceName, pluralResourceName) => {
-      return action(specFilePath, resourceName, pluralResourceName);
+    .addArgument(new Argument("[resource-version]", "version"))
+    .action(async (pluralResourceName, resourceVersion) => {
+      return action(pluralResourceName, resourceVersion);
     });
 
   command.description(description);
+
+  return command;
+}
+
+export function createVersionCommand() {
+  const command = new Command("version")
+    .addArgument(new Argument("<resource-name>", "[resource-name]"))
+    .addArgument(new Argument("<stability>", "stability"))
+
+    .action(async (resourceName, stability) => {
+      return promoteVersionAction(resourceName, stability);
+    });
+
+  command.description("create a new resource");
+
+  return command;
+}
+
+export function createUpdateCommand() {
+  const command = new Command("update")
+    .addArgument(
+      new Argument("<plural-resource-name>", "[plural-resource-name]"),
+    )
+    .addArgument(new Argument("[resource-version]", "version"))
+    .action(async (pluralResourceName, resourceVersion) => {
+      return updateResourceAction(pluralResourceName, resourceVersion);
+    });
+
+  command.description("update a resource schema from examples");
 
   return command;
 }

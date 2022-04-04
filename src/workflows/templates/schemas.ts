@@ -11,6 +11,7 @@ export function buildItemResponseSchema(
       data: {
         type: "object",
         description: `${resourceName} resource object`,
+        required: ["id", "type"],
         properties: {
           id: idSchema,
           type: refs.schemas.types,
@@ -40,6 +41,7 @@ export function buildCollectionResponseSchema(
         type: "array",
         items: {
           type: "object",
+          required: ["id", "type"],
           properties: {
             id: idSchema,
             type: refs.schemas.types,
@@ -62,20 +64,20 @@ export function buildCreateRequestSchema(
 ): OpenAPIV3.SchemaObject {
   return {
     type: "object",
+    required: ["data"],
     properties: {
-      id: {
-        type: "string",
-        format: "uuid",
-      },
-      type: {},
-      attributes: {
-        $ref: `#/components/schemas/${titleResourceName}CreateAttributes`,
-      },
-      relationships: {
-        $ref: `#/components/schemas/${titleResourceName}Relationships`,
+      data: {
+        type: "object",
+        required: ["type"],
+        properties: {
+          type: refs.schemas.types,
+          attributes: {
+            $ref: `#/components/schemas/${titleResourceName}CreateAttributes`,
+          },
+        },
+        additionalProperties: false,
       },
     },
-    additionalProperties: false,
   };
 }
 
@@ -84,20 +86,23 @@ export function buildUpdateRequestSchema(
 ): OpenAPIV3.SchemaObject {
   return {
     type: "object",
+    required: ["data"],
     properties: {
-      id: {
-        type: "string",
-        format: "uuid",
-      },
-      type: {},
-      attributes: {
-        $ref: `#/components/schemas/${titleResourceName}UpdateAttributes`,
-      },
-      relationships: {
-        $ref: `#/components/schemas/${titleResourceName}Relationships`,
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            format: "uuid",
+          },
+          type: refs.schemas.types,
+          attributes: {
+            $ref: `#/components/schemas/${titleResourceName}UpdateAttributes`,
+          },
+        },
+        additionalProperties: false,
       },
     },
-    additionalProperties: false,
   };
 }
 
